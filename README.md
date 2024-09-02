@@ -39,7 +39,7 @@ LMM:
 * __PISI-NMF__: Preserving the intrinsic structure invariant non-negative matrix factorization (DOI: [10.3390/s18103528](https://doi.org/10.3390/s18103528))
 * __HU-JSTV__: Hyperspectral unmixing using joint sparsity and total variation (DOI: [10.1109/JSTARS.2016.2521898](https://doi.org/10.1109/JSTARS.2016.2521898))
 * __NMF-QMV__: NMF with quadratic minimum volume (DOI: [10.1109/TGRS.2019.2929776](https://doi.org/10.1109/TGRS.2019.2929776))
-* __gtvMBO__:  graph total variation with Merriman-Bence-Osher scheme (DOI: [10.1109/TGRS.2020.3020810](https://doi.org/10.1109/TGRS.2020.3020810))
+* __gtvMBO__:  graph total variation with Merriman-Bence-Osher scheme (DOI: [10.1109/TGRS.2020.3020810](https://doi.org/10.1109/TGRS.2020.3020810)), code taken from [here](https://github.com/HarlinLee/gtvMBO-public)
 
 MMM:
 
