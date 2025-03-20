@@ -31,21 +31,27 @@ lambda=0.1;                                                                     
 epsilon=1e-3;            % Threshold for convergence
 maxiter=50;              % Maximum number of iteration in alternated least squares approach
 downsampling=0.0;       % Downsampling factor to estimate end-members \in [0,1)
-parallel=0;              % Parallelization in abundance estimation process
+parallel=1;              % Parallelization in abundance estimation process
 disp_iter=0;          % Display results of iterative optimization
 initcond=6;
 lm=0.01;
+
+%%% AMLMPSO Parameters
+alpha=0.01; 
+beta=0.015; 
+gamma=0.1; 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialize Performance Metrics
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-ResultsYh=zeros(length(sSNR),5,Rep);
-ResultsAh=zeros(length(sSNR),5,Rep);
-ResultsPh=zeros(length(sSNR),5,Rep);
-ResultsTh=zeros(length(sSNR),5,Rep);
-ResultsPh2=zeros(length(sSNR),5,Rep);
-ResultsDh=zeros(length(sSNR),5,Rep);
+ResultsYh=zeros(length(sSNR),6,Rep);
+ResultsAh=zeros(length(sSNR),6,Rep);
+ResultsPh=zeros(length(sSNR),6,Rep);
+ResultsTh=zeros(length(sSNR),6,Rep);
+ResultsPh2=zeros(length(sSNR),6,Rep);
+ResultsDh=zeros(length(sSNR),6,Rep);
 ResultsVh=zeros(length(sSNR),Rep);
 
 for index=1:length(sSNR)
@@ -173,7 +179,16 @@ for index=1:length(sSNR)
         ResultsPh(index,5,j)=errorendmembers(P0,P5);
         ResultsPh2(index,5,j)=errorSAM(P0,P5);
         ResultsTh(index,5,j)=Tgmlm;
-        
+        disp('AMLMPSO')
+        tic
+        [P6, A6, D6, S6, d6, Zh6] = AMLMPSO(Z, N ,alpha, beta, gamma);
+        tam=toc;
+        ResultsYh(index,6,j)=norm(Zh6-Z,'fro')/norm(Z,'fro');
+        ResultsDh(index,6,j)=norm(D6-D0,'fro')/norm(D0,'fro');
+        ResultsAh(index,6,j)=errorabundances(A0,A6);
+        ResultsPh(index,6,j)=errorendmembers(P0,P6);
+        ResultsPh2(index,6,j)=errorSAM(P0,P6);
+        ResultsTh(index,6,j)=tam;
     end
 end
 
@@ -191,7 +206,7 @@ end
 clc
 disp('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
 disp('Mean Responses in Performance Metrics')
-disp('SNR/Density      NEBEAE-SN       NEBEAE         Supervised MLM      Unsupervised MLM             GMLM');
+disp('SNR/Density      NEBEAE-SN       NEBEAE         Supervised MLM      Unsupervised MLM             GMLM               AMLMPSO');
 disp('%%%%%%%%%%%%%%%');
 disp('Error in Output Estimation (%)');
 disp([num2str(int8(sSNR')) slash num2str((pDensity')) AAnd  mon num2str(mean(ResultsYh(:,1,:),3),NP) PM  num2str(std(ResultsYh(:,1,:),[],3),NP) mon ...
@@ -199,6 +214,7 @@ disp([num2str(int8(sSNR')) slash num2str((pDensity')) AAnd  mon num2str(mean(Res
     AAnd mon num2str(mean(ResultsYh(:,3,:),3),NP) PM num2str(std(ResultsYh(:,3,:),[],3),NP) mon...
     AAnd mon num2str(mean(ResultsYh(:,4,:),3),NP) PM num2str(std(ResultsYh(:,4,:),[],3),NP) mon...
     AAnd mon num2str(mean(ResultsYh(:,5,:),3),NP) PM num2str(std(ResultsYh(:,5,:),[],3),NP) mon...
+    AAnd mon num2str(mean(ResultsYh(:,6,:),3),NP) PM num2str(std(ResultsYh(:,6,:),[],3),NP) mon...
     EEnd]);
 disp('%%%%%%%%%%%%%%%');
 disp('Error in Abundance Estimation (%)');
@@ -207,6 +223,7 @@ disp([num2str(int8(sSNR')) slash num2str((pDensity')) AAnd mon num2str(mean(Resu
     AAnd mon num2str(mean(ResultsAh(:,3,:),3),NP) PM num2str(std(ResultsAh(:,3,:),[],3),NP) mon...
     AAnd mon num2str(mean(ResultsAh(:,4,:),3),NP) PM num2str(std(ResultsAh(:,4,:),[],3),NP) mon...
     AAnd mon num2str(mean(ResultsAh(:,5,:),3),NP) PM num2str(std(ResultsAh(:,5,:),[],3),NP) mon...
+    AAnd mon num2str(mean(ResultsAh(:,6,:),3),NP) PM num2str(std(ResultsAh(:,6,:),[],3),NP) mon...
     EEnd]);
 disp('%%%%%%%%%%%%%%%');
 disp('Error in End-member Estimation');
@@ -215,6 +232,7 @@ disp([num2str(int8(sSNR')) slash num2str((pDensity')) AAnd mon num2str(mean(Resu
     AAnd mon num2str(mean(ResultsPh(:,3,:),3),NP) PM num2str(std(ResultsPh(:,3,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsPh(:,4,:),3),NP) PM num2str(std(ResultsPh(:,4,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsPh(:,5,:),3),NP) PM num2str(std(ResultsPh(:,5,:),[],3),NP) mon ...
+    AAnd mon num2str(mean(ResultsPh(:,6,:),3),NP) PM num2str(std(ResultsPh(:,6,:),[],3),NP) mon ...
     EEnd]);
 disp('%%%%%%%%%%%%%%%');
 disp('Error in End-member Estimation (SAM)');
@@ -223,6 +241,7 @@ disp([num2str(int8(sSNR')) slash num2str((pDensity')) AAnd mon num2str(mean(Resu
     AAnd mon num2str(mean(ResultsPh2(:,3,:),3),NP) PM num2str(std(ResultsPh2(:,3,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsPh2(:,4,:),3),NP) PM num2str(std(ResultsPh2(:,4,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsPh2(:,5,:),3),NP) PM num2str(std(ResultsPh2(:,5,:),[],3),NP) mon ...
+    AAnd mon num2str(mean(ResultsPh2(:,6,:),3),NP) PM num2str(std(ResultsPh2(:,6,:),[],3),NP) mon ...
     EEnd]);
 disp('%%%%%%%%%%%%%%%');
 disp('Error in Non-linear interaction levels Estimation');
@@ -232,6 +251,7 @@ disp([num2str(int8(sSNR')) slash num2str((pDensity')) ...
     AAnd mon num2str(mean(ResultsDh(:,3,:),3),NP) PM num2str(std(ResultsDh(:,3,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsDh(:,4,:),3),NP) PM num2str(std(ResultsDh(:,4,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsDh(:,5,:),3),NP) PM num2str(std(ResultsDh(:,5,:),[],3),NP) mon ...
+    AAnd mon num2str(mean(ResultsDh(:,6,:),3),NP) PM num2str(std(ResultsDh(:,6,:),[],3),NP) mon ...
     EEnd]);
 disp('%%%%%%%%%%%%%%%');
 disp('Computation Time');
@@ -241,6 +261,7 @@ disp([num2str(int8(sSNR')) slash num2str((pDensity')) ...
     AAnd mon num2str(mean(ResultsTh(:,3,:),3),NP) PM num2str(std(ResultsTh(:,3,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsTh(:,4,:),3),NP) PM num2str(std(ResultsTh(:,4,:),[],3),NP) mon ...
     AAnd mon num2str(mean(ResultsTh(:,5,:),3),NP) PM num2str(std(ResultsTh(:,5,:),[],3),NP) mon ...
+    AAnd mon num2str(mean(ResultsTh(:,6,:),3),NP) PM num2str(std(ResultsTh(:,6,:),[],3),NP) mon ...
     EEnd]);
 disp('%%%%%%%%%%%%%%%');
 disp('Error in Sparse Noise Estimation (%)');
@@ -260,7 +281,7 @@ numComparisons = algs - 1; % Number of comparisons with the first algorithm
 TabAnova = zeros(length(sSNR), numComparisons); % Initialize matrix to store p-values
 
 % Initialize comparison names for only the first algorithm
-comparisonNames = {' vs_NEBEAE', '     vs_Supervised MLM', '     vs_Unsupervised MLM', '     vs_GMLM'};
+comparisonNames = {' vs_NEBEAE', '     vs_Supervised MLM', '     vs_Unsupervised MLM', '     vs_GMLM', 'vs_AMLMPSO'};
 
 % Loop over each condition
 for index = 1:length(sSNR)
